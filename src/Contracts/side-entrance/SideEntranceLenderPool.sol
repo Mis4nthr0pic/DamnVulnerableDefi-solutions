@@ -2,6 +2,7 @@
 pragma solidity 0.8.17;
 
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
+import "forge-std/console.sol";
 
 interface IFlashLoanEtherReceiver {
     function execute() external payable;
@@ -32,9 +33,7 @@ contract SideEntranceLenderPool {
     function flashLoan(uint256 amount) external {
         uint256 balanceBefore = address(this).balance;
         if (balanceBefore < amount) revert NotEnoughETHInPool();
-
         IFlashLoanEtherReceiver(msg.sender).execute{value: amount}();
-
         if (address(this).balance < balanceBefore) {
             revert FlashLoanHasNotBeenPaidBack();
         }
