@@ -16,11 +16,13 @@ contract SideEntranceLenderPool {
     using Address for address payable;
 
     mapping(address => uint256) private balances;
+    mapping(address => bool) public activeLoans;
 
     error NotEnoughETHInPool();
     error FlashLoanHasNotBeenPaidBack();
 
     function deposit() external payable {
+        require(msg.sender != address(this));
         balances[msg.sender] += msg.value;
     }
 
