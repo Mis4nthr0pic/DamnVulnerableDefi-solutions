@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "solidity.formatter": "forge",
+    "[solidity]": {
+        "editor.defaultFormatter": "JuanBlanco.solidity"
+    },
+    "solidity.compileUsingLocalVersion": "/Users/alexandremelo/projects/damn-vulnerable-defi-foundry/soljson-v0.8.17+commit.8df45f5f.js",
+    "solidity.compileUsingRemoteVersion": "v0.8.17+commit.8df45f5f"
+}
