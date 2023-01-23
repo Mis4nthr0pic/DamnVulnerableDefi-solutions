@@ -1,6 +1,6 @@
 # Damn Vulnerable DeFi - Foundry Version - Mis4nthr0pic Solutions ⚒️
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/@mis4nhtr0pic?label=Follow%20me%20%40mis4nhtr0pic&style=social)](https://twitter.com/@mis4nhtr0pic)
+[![Twitter Follow](https://img.shields.io/twitter/follow/@mis4nthr0pic?label=Follow%20me%20%mis4nthr0pic&style=social)](https://twitter.com/@mis4nthr0pic)
 
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/nicolasgarcia214/damn-vulnerable-defi-foundry)
