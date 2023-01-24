@@ -45,7 +45,7 @@ contract TrustfulOracle is AccessControlEnumerable {
             _setupRole(INITIALIZER_ROLE, msg.sender);
         }
     }
-
+    
     // A handy utility allowing the deployer to setup initial prices (only once)
     function setupInitialPrices(address[] memory sources, string[] memory symbols, uint256[] memory prices)
         public

