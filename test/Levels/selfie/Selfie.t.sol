@@ -7,6 +7,7 @@ import "forge-std/Test.sol";
 import {DamnValuableTokenSnapshot} from "../../../src/Contracts/DamnValuableTokenSnapshot.sol";
 import {SimpleGovernance} from "../../../src/Contracts/selfie/SimpleGovernance.sol";
 import {SelfiePool} from "../../../src/Contracts/selfie/SelfiePool.sol";
+import {Attack} from "../../../src/Contracts/selfie/Attack.sol";
 
 contract Selfie is Test {
     uint256 internal constant TOKEN_INITIAL_SUPPLY = 2_000_000e18;
@@ -15,6 +16,7 @@ contract Selfie is Test {
     Utilities internal utils;
     SimpleGovernance internal simpleGovernance;
     SelfiePool internal selfiePool;
+    Attack internal attack;
     DamnValuableTokenSnapshot internal dvtSnapshot;
     address payable internal attacker;
 
@@ -38,6 +40,8 @@ contract Selfie is Test {
 
         dvtSnapshot.transfer(address(selfiePool), TOKENS_IN_POOL);
 
+        attack = new Attack(address(selfiePool), address(simpleGovernance));
+
         assertEq(dvtSnapshot.balanceOf(address(selfiePool)), TOKENS_IN_POOL);
 
         console.log(unicode"🧨 Let's see if you can break it... 🧨");
@@ -48,6 +52,11 @@ contract Selfie is Test {
          * EXPLOIT START *
          */
 
+        vm.startPrank(attacker);
+        attack.execute();
+        vm.warp(block.timestamp + 3 days); // 5 days
+        attack.finish();
+        vm.stopPrank();
         /**
          * EXPLOIT END *
          */

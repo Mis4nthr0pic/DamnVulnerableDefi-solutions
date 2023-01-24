@@ -9,6 +9,7 @@ import {TheRewarderPool} from "../../../src/Contracts/the-rewarder/TheRewarderPo
 import {RewardToken} from "../../../src/Contracts/the-rewarder/RewardToken.sol";
 import {AccountingToken} from "../../../src/Contracts/the-rewarder/AccountingToken.sol";
 import {FlashLoanerPool} from "../../../src/Contracts/the-rewarder/FlashLoanerPool.sol";
+import {Attack} from "../../../src/Contracts/the-rewarder/Attack.sol";
 
 contract TheRewarder is Test {
     uint256 internal constant TOKENS_IN_LENDER_POOL = 1_000_000e18;
@@ -18,6 +19,7 @@ contract TheRewarder is Test {
     FlashLoanerPool internal flashLoanerPool;
     TheRewarderPool internal theRewarderPool;
     DamnValuableToken internal dvt;
+    Attack internal attack;
     address payable[] internal users;
     address payable internal attacker;
     address payable internal alice;
@@ -51,6 +53,13 @@ contract TheRewarder is Test {
         dvt.transfer(address(flashLoanerPool), TOKENS_IN_LENDER_POOL);
 
         theRewarderPool = new TheRewarderPool(address(dvt));
+
+        attack = new Attack(
+            address(theRewarderPool.rewardToken()),
+            address(dvt), 
+            address(flashLoanerPool), 
+            address(theRewarderPool)
+        );
 
         // Alice, Bob, Charlie and David deposit 100 tokens each
         for (uint8 i; i < 4; i++) {
@@ -89,6 +98,13 @@ contract TheRewarder is Test {
          * EXPLOIT START *
          */
 
+        //log the amount of tokens in flashLoan pool
+        vm.warp(block.timestamp + 5 days); // 5 days
+
+        vm.startPrank(attacker);
+        attack.execute();
+        vm.stopPrank();
+
         /**
          * EXPLOIT END *
          */
@@ -110,6 +126,7 @@ contract TheRewarder is Test {
         assertGt(theRewarderPool.rewardToken().totalSupply(), 100e18);
         uint256 rewardAttacker = theRewarderPool.rewardToken().balanceOf(attacker);
 
+        console.log(rewardAttacker);
         // The amount of rewards earned should be really close to 100 tokens
         uint256 deltaAttacker = 100e18 - rewardAttacker;
         assertLt(deltaAttacker, 1e17);
