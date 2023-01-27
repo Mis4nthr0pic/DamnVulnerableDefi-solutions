@@ -9,6 +9,7 @@ import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../sr
 import {DamnValuableNFT} from "../../../src/Contracts/DamnValuableNFT.sol";
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
 import {WETH9} from "../../../src/Contracts/WETH9.sol";
+import {Attack} from "../../../src/Contracts/free-rider/Attack.sol";
 
 contract FreeRider is Test {
     // The NFT marketplace will have 6 tokens, at 15 ETH each
@@ -27,6 +28,7 @@ contract FreeRider is Test {
     FreeRiderBuyer internal freeRiderBuyer;
     FreeRiderNFTMarketplace internal freeRiderNFTMarketplace;
     DamnValuableToken internal dvt;
+    Attack internal attack;
     DamnValuableNFT internal damnValuableNFT;
     IUniswapV2Pair internal uniswapV2Pair;
     IUniswapV2Factory internal uniswapV2Factory;
@@ -125,6 +127,14 @@ contract FreeRider is Test {
             address(damnValuableNFT)
         );
 
+        attack = new Attack(
+            address(weth),
+            address(uniswapV2Pair),
+            address(freeRiderBuyer),
+            address(freeRiderNFTMarketplace),
+            address(damnValuableNFT)
+        );
+
         vm.stopPrank();
 
         console.log(unicode"🧨 Let's see if you can break it... 🧨");
@@ -135,6 +145,8 @@ contract FreeRider is Test {
          * EXPLOIT START *
          */
         vm.startPrank(attacker, attacker);
+
+        attack.execute();
 
         vm.stopPrank();
         /**

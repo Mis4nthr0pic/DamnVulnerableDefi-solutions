@@ -1,5 +1,7 @@
 pragma solidity 0.8.17;
 
+import "forge-std/console.sol";
+
 contract WETH9 {
     string public constant name = "Wrapped Ether";
     string public constant symbol = "WETH";

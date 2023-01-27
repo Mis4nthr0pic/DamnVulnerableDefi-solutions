@@ -4,11 +4,12 @@ pragma solidity 0.8.17;
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import {DamnValuableNFT} from "../DamnValuableNFT.sol";
-
+import "forge-std/console.sol";
 /**
  * @title FreeRiderNFTMarketplace
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
  */
+
 contract FreeRiderNFTMarketplace is ReentrancyGuard {
     using Address for address payable;
 
@@ -67,7 +68,6 @@ contract FreeRiderNFTMarketplace is ReentrancyGuard {
         require(msg.value >= priceToPay, "Amount paid is not enough");
 
         amountOfOffers--;
-
         // transfer from seller to buyer
         token.safeTransferFrom(token.ownerOf(tokenId), msg.sender, tokenId);
 
